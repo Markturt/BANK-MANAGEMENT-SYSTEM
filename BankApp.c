@@ -6,10 +6,10 @@
 typedef struct 
 {
     int balance;
-    char* name;
-    char* acct_No;
+    string name;
+    string acct_No;
     bool acct_deleted;
-    char* password;
+    string password;
 } customer;
 
 
@@ -22,6 +22,7 @@ void manage_acct(void);
 void make_transactions(void);
 void check_balance(void);
 void create_acct(int customer_index);
+char* generate_acct_no(void);
 
 int main(void)
 {
@@ -134,19 +135,36 @@ void check_balance(void)
 void create_acct(int customer_index)
 {
     char name[100];
-    char password[100];
+    char password[30];
 
     printf("Name: ");
-    scanf("%s",&name);
+    scanf("%s",name);
 
-    printf("\n Create password: ");
+    printf("Create password: ");
     scanf("%s",&password);
 
     customers[customer_index].name =name;
     customers[customer_index].password =password;
-    customers[customer_index].acct_No="1234567890";
+    customers[customer_index].acct_No= generate_acct_no();
     customers[customer_index].acct_deleted=false;
     customers[customer_index].balance =0;
-
     
+}
+
+string str;
+string generate_acct_no()
+{
+    long long min =1000000000;
+    long long max =9999999999;
+    long long num;
+  
+    srand(time(NULL));
+    
+    // This yields a 10 digit number.
+    num= min + rand()%(max-min);
+
+    sprintf(str, "%d", num);
+
+    printf("%s\n",str);
+    return str;
 }
