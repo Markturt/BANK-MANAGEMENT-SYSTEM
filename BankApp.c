@@ -25,7 +25,8 @@ void make_transactions(void);
 void check_balance(void);
 void create_acct(int customer_index);
 string generate_acct_no(void);
-void delete_acct(char* acct_No,int number_of_customers);
+void delete_acct(string acct_No,int number_of_customers);
+void modify(string password,string acct_no);
 
 int main(void)
 {
@@ -39,10 +40,11 @@ int main(void)
 
         printf("1. Manage Account\n");
         printf("2. Handle Transactions\n");
-        printf("3. Check Balance\n");
+        printf("3. Account Enquiry\n");
         printf("4. Exit\n");
 
-        scanf("%i",&option);
+        // scanf("%i",&option);
+        option = get_int("Enter option:  ");
 
         if(option==1)
         {
@@ -63,7 +65,7 @@ int main(void)
         }
         else
         {
-            printf("Invalid Option.\n");
+            printf("\nInvalid Option.\n\n");
             continue;
         }
     }       
@@ -75,33 +77,34 @@ void manage_acct(void)
     printf("2. Delete Existing Account\n");
     printf("3. Modify Account Details.\n");
 
-    int option;
-    scanf("%i",&option);
+    int option =get_int("Enter Option: ");
+    
 
-    if(option ==1)
+    if(option == 1)
     {
         // Create new Account.
         create_acct(number_of_customers);
         number_of_customers++;
     }
-    else if(option ==2)
+    else if(option == 2)
     {
         // Delete  Account.
-        char acc_no[11];
-        printf("Delete Account by Entering Account Number.\n");
-        printf("Enter Account Number: ");
-        scanf("%s",&acc_no);
-        printf("%s\n",acc_no);
+        string  acc_no= get_string("Enter Account Number to be Deleted: ");
+        
         delete_acct(acc_no,number_of_customers);
-        number_of_customers--;
     }
-    else if(option ==3)
+    else if(option == 3)
     {
-        // Modify Account details
+        printf("Enter Account Details to be Modified.\n");
+
+        string number = get_string("Account Number:  ");
+        string password =get_string("Password: ");
+
+        modify(password,number);
     }
     else
     {
-        printf("Invalid option...\n");
+        printf("\nInvalid option...\n\n");
     }
 
 }
@@ -134,31 +137,16 @@ void make_transactions(void)
 
 void check_balance(void)
 {
-    const int SIZE =100;
-    char number[SIZE];
-    char password[SIZE];
-    // Performs Some form of Authentication before Checking the Balance
-    printf("Account Number: ");
-    
-    scanf("%s",&number);
-
-    printf("Password: ");
-    scanf("%s",&password);
+    string number =get_string("Account Number: ");
+    string password=get_string("Password: ");
+    // Performs some sort of Authentication.
 }
 
 void create_acct(int customer_index)
 {
-    char name[100];
-    char password[30];
-
-    printf("Name: ");
-    scanf(" %[^\n]",name);
-
-    printf("Create password: ");
-    scanf("%s",&password);
-
-    char* acct_no;
-    acct_no= generate_acct_no();
+    string name =get_string("Name: ");
+    string password =get_string("Create Password: ");
+    string acct_no =generate_acct_no();
 
     customers[customer_index].name =name;
     customers[customer_index].password =password;
@@ -193,7 +181,7 @@ string generate_acct_no(void)
 }
 
 
-void delete_acct(char* acct_No,int number_of_customers)
+void delete_acct(string acct_No,int number_of_customers)
 {
     for(int i=0;i<number_of_customers;i++)
     {
@@ -204,5 +192,35 @@ void delete_acct(char* acct_No,int number_of_customers)
             return;
         }
     }
-    printf("Account Does not Exist\n");
+    printf("\nAccount Does not Exist\n\n");
 }
+
+void modify(string password, string acct_no)
+{
+    for(int i=0;i < number_of_customers;i++)
+    {
+        if((strcmp(customers[i].password,password)==0)  && (strcmp(customers[i].acct_No,acct_no)==0) && (customers[i].acct_deleted==false))
+        {
+            string new_password;
+            int count =0;
+            do
+            {
+                if(count>0)
+                {
+                    printf("\nEnter a different password.\n\n");
+                }
+                new_password = get_string("Enter New Password: ");
+                
+                count++;
+            } 
+            while (strcmp(customers[i].password,new_password) ==0);
+            
+            customers[i].name = get_string("Enter new Name: ");;
+            customers[i].password = new_password;
+            printf("Account Successfully modified.\n");
+            return;
+        }
+    }
+    printf("Account Provided Isn't found on the DataBase.\n");
+}
+
