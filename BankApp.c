@@ -2,6 +2,7 @@
 #include <cs50.h>
 #include <time.h>
 #include <stdlib.h>
+#include <string.h>
 
 typedef struct 
 {
@@ -14,7 +15,8 @@ typedef struct
 
 
 
-customer customers[]={};
+customer customers[10000];
+int number_of_customers = 0;
 
 
 //Function Prototypes
@@ -22,48 +24,53 @@ void manage_acct(void);
 void make_transactions(void);
 void check_balance(void);
 void create_acct(int customer_index);
-char* generate_acct_no(void);
+string generate_acct_no(void);
+void delete_acct(char* acct_No,int number_of_customers);
 
 int main(void)
 {
-    int option;
+    int option =22;
 
     printf("You are Welcome! \n");
     
-    printf("\n Select from the options Below. \n\n");
-
-    printf("1. Manage Account\n");
-    printf("2. Handle Transactions\n");
-    printf("3. Check Balance\n");
-
-    scanf("%i",&option);
-
-    switch (option)
+    while(option != 4)
     {
-    case 1:
-        manage_acct();   
-        break;
-    case 2:
-        // Handle Transactions
-        make_transactions();
-        break;
-    case 3:
-        // Check Balance
-        check_balance();
-        break;
-    default:
-    printf("Invalid Option.\n");
-        break;
-    }
-    
+        printf("Select from the options Below. \n\n");
+
+        printf("1. Manage Account\n");
+        printf("2. Handle Transactions\n");
+        printf("3. Check Balance\n");
+        printf("4. Exit\n");
+
+        scanf("%i",&option);
+
+        if(option==1)
+        {
+            manage_acct();   
+        }
+        else if(option ==2)
+        {
+            make_transactions();
+        }   
+        else if(option ==3)
+        {
+            check_balance();
+        }
+        else if(option ==4)
+        {
+            printf("Exit.....\n");
+            break;
+        }
+        else
+        {
+            printf("Invalid Option.\n");
+            continue;
+        }
+    }       
 }
-
-
 
 void manage_acct(void)
 {
-    int number_of_customers = 0;
-
     printf("1. Create new Account\n");
     printf("2. Delete Existing Account\n");
     printf("3. Modify Account Details.\n");
@@ -71,23 +78,30 @@ void manage_acct(void)
     int option;
     scanf("%i",&option);
 
-    switch (option)
+    if(option ==1)
     {
-    case 1:
         // Create new Account.
         create_acct(number_of_customers);
         number_of_customers++;
-        break;
-    case 2:
-        // Delete new Account.
+    }
+    else if(option ==2)
+    {
+        // Delete  Account.
+        char acc_no[11];
+        printf("Delete Account by Entering Account Number.\n");
+        printf("Enter Account Number: ");
+        scanf("%s",&acc_no);
+        printf("%s\n",acc_no);
+        delete_acct(acc_no,number_of_customers);
         number_of_customers--;
-        break;
-    case 3:
+    }
+    else if(option ==3)
+    {
         // Modify Account details
-        break;
-    default:
-    printf("Invalid Option.\n");
-        break;
+    }
+    else
+    {
+        printf("Invalid option...\n");
     }
 
 }
@@ -138,33 +152,57 @@ void create_acct(int customer_index)
     char password[30];
 
     printf("Name: ");
-    scanf("%s",name);
+    scanf(" %[^\n]",name);
 
     printf("Create password: ");
     scanf("%s",&password);
 
+    char* acct_no;
+    acct_no= generate_acct_no();
+
     customers[customer_index].name =name;
     customers[customer_index].password =password;
-    customers[customer_index].acct_No= generate_acct_no();
+    customers[customer_index].acct_No= acct_no;
     customers[customer_index].acct_deleted=false;
     customers[customer_index].balance =0;
-    
+
+    printf("\nAccount Successfully Created. Handle Your Details Confidentially.\n\n");
+
+    printf("Account Name: %s\n", customers[customer_index].name);
+    printf("Account Number: %s\n", customers[customer_index].acct_No);
+    printf("Password: %s\n", customers[customer_index].password);
 }
 
-string str;
-string generate_acct_no()
+string generate_acct_no(void) 
 {
-    long long min =1000000000;
-    long long max =9999999999;
-    long long num;
+    int min = 1000000000;
+    long long max = 9999999999;
   
     srand(time(NULL));
     
-    // This yields a 10 digit number.
-    num= min + rand()%(max-min);
+    // Generate a 10-digit number.
+    int num = min + rand() % (max - min + 1);
 
-    sprintf(str, "%d", num);
+    static char bufer[20];
 
-    printf("%s\n",str);
-    return str;
+    // Convert the number to a string and store it in the provided buffer.
+    
+    itoa(num,bufer,10);
+
+    return bufer;
+}
+
+
+void delete_acct(char* acct_No,int number_of_customers)
+{
+    for(int i=0;i<number_of_customers;i++)
+    {
+        if((strcmp(customers[i].acct_No,acct_No) ==0) && (customers[i].acct_deleted==false))
+        {
+            customers[i].acct_deleted =true;
+            printf("Account Successfully Deleted.\n");
+            return;
+        }
+    }
+    printf("Account Does not Exist\n");
 }
