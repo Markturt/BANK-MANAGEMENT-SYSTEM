@@ -9,9 +9,9 @@ This application is a simple banking system simulation written in C. It allows u
 1. [System Requirements](#system_requirements)
 1. [Data Structures](#data-structures)
 1. [Function Descriptions](#function-descriptions)
-1. Usage
-1. Troubleshooting
-1. Contact Information
+1. [Usage](#usage)
+1. [Troubleshooting](#troubleshooting)
+1. [Contact Information](#contact-information)
 
 
 ## System Requirements
@@ -38,11 +38,11 @@ This structure stores customer information:
 ## Function Descriptions
 ### Main Functions
 - `int main(void)`
-    -This is the entry point of the application. It provides a menu for users to select options to manage accounts, handle transactions, check balances, or exit the application.
+    - This is the entry point of the application. It provides a menu for users to select options to manage accounts, handle transactions, check balances, or exit the application.
 ### Helper Functions
 - `int get_customer_index(int acct_num)`
 
-    -Returns the index of a customer in the `customers` array based on the account number. If the account is not found or is deleted, it returns `-7`.
+    - Returns the index of a customer in the `customers` array based on the account number. If the account is not found or is deleted, it returns `-7`.
 - `int generate_acct_no(void)`
 
     - Generates a random account number in the range of 10-digit integers.
