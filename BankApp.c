@@ -8,219 +8,340 @@ typedef struct
 {
     int balance;
     string name;
-    string acct_No;
+    int acct_No;
     bool acct_deleted;
     string password;
 } customer;
 
 
 
-customer customers[10000];
+customer customers[100];
 int number_of_customers = 0;
 
 
 //Function Prototypes
+void create_acct(void);
 void manage_acct(void);
+int generate_acct_no(void);
+int get_customer_index(int acct_num);
+void delete_acct(int account_number,string passkey);
+void modify_acct(string passKey ,int acct_num);
 void make_transactions(void);
-void check_balance(void);
-void create_acct(int customer_index);
-string generate_acct_no(void);
-void delete_acct(string acct_No,int number_of_customers);
-void modify(string password,string acct_no);
+void deposit_money(int Acc_No);
+void withdraw_money(int Acc_No,string password);
+void transfer(string password,int giver);
+void check_balance(int acct_no,string password);
 
 int main(void)
 {
     int option =22;
-
-    printf("You are Welcome! \n");
-    
-    while(option != 4)
+    while(option !=0)
     {
-        printf("Select from the options Below. \n\n");
+        printf("Enter The Index Of the operation you Want to Perform.\n");
+        printf("1. Manage Account.\n");
+        printf("2. Handle Transactions.\n");
+        printf("3. Check Balance.\n");
+        printf("4. Exit...\n");
 
-        printf("1. Manage Account\n");
-        printf("2. Handle Transactions\n");
-        printf("3. Account Enquiry\n");
-        printf("4. Exit\n");
+        option =get_int("Enter Option: ");
 
-        // scanf("%i",&option);
-        option = get_int("Enter option:  ");
-
-        if(option==1)
+        if(option ==1)
         {
-            manage_acct();   
+            manage_acct();
         }
         else if(option ==2)
         {
             make_transactions();
-        }   
-        else if(option ==3)
+        }
+        else if(option == 3 )
         {
-            check_balance();
+            int acc_no =get_int("Account Number: ");
+            string password = get_string("Password: ");
+            check_balance(acc_no,password);
         }
         else if(option ==4)
         {
-            printf("Exit.....\n");
-            break;
+            printf("Thank You For Banking with Us.\n");
+            option =0;
         }
         else
         {
-            printf("\nInvalid Option.\n\n");
-            continue;
+            printf("Invalid Operations.\n");
         }
-    }       
+    }  
 }
+
+// Helper Functions
+int get_customer_index(int acct_num)
+{
+    // This Functions returns the index of a customer 
+    //if the acct has not been deleted and returns -7 if the account doesnt exist.
+    for(int i=0;i < number_of_customers; i++)
+    {
+        int check =customers[i].acct_No==acct_num;
+        if( check == 1 && (!customers[i].acct_deleted))
+        {
+            return i;
+        }
+    }
+    return -7;
+}
+
+int generate_acct_no(void)
+{
+    srand(time(NULL));
+
+    long long min =1000000000;
+    long long max =9999999999;
+
+    int num = min + rand()%(max-min +1);
+
+    return num;
+}
+
+// Programs Functions.
 
 void manage_acct(void)
 {
-    printf("1. Create new Account\n");
-    printf("2. Delete Existing Account\n");
-    printf("3. Modify Account Details.\n");
+    printf("What do you want to do? \n");
 
-    int option =get_int("Enter Option: ");
-    
+    printf("1. Create Account. \n");
+    printf("2. Delete Account. \n");
+    printf("3. Modify Account.\n");
 
-    if(option == 1)
+    int  option = get_int("Choose From the List Above. \n");
+
+    if(option ==1)
     {
-        // Create new Account.
-        create_acct(number_of_customers);
-        number_of_customers++;
+        create_acct();
     }
-    else if(option == 2)
+    else if(option ==2)
     {
-        // Delete  Account.
-        string  acc_no= get_string("Enter Account Number to be Deleted: ");
-        
-        delete_acct(acc_no,number_of_customers);
+        int account_number =get_int("Account Number: ");
+        string password = get_string("Password: ");
+        delete_acct(account_number,password);
     }
-    else if(option == 3)
+    else if(option ==3)
     {
-        printf("Enter Account Details to be Modified.\n");
+        printf("Enter The Details of the  Account You Want to Modify.\n");
 
-        string number = get_string("Account Number:  ");
-        string password =get_string("Password: ");
+        string password =get_string("Password:  ");
+        int acct_numb =get_int("Account Number: ");
 
-        modify(password,number);
+        modify_acct(password,acct_numb);
     }
     else
     {
-        printf("\nInvalid option...\n\n");
+        printf("Invalid option.\n");
     }
+    return;
+}
+void create_acct(void)
+{
+    int customer_index =number_of_customers;
+    const int acc_no =generate_acct_no();
+    
+    customers[customer_index].acct_deleted =false;
+    customers[customer_index].balance =0;
+    customers[customer_index].name =get_string("Name: ");
+    customers[customer_index].password =get_string("Password: ");
+    customers[customer_index].acct_No = acc_no;
 
+    printf("Account Successfully Created,Your account Number is %i\n",acc_no);
+
+    number_of_customers++;
+    return;
+}
+
+void delete_acct(int account_number,string passkey)
+{
+    int index =get_customer_index(account_number);
+
+    if(index ==-7)
+    {
+        printf("Account Not Found.\n");
+    }
+    else if(strcmp(customers[index].password,passkey)==0)
+    {
+        customers[index].acct_deleted =true;
+        printf("Account successfully Deleted.\n");
+    }
+    else
+    {
+        printf("Password is not a match.\n");
+    }
+    return;
+}
+
+void modify_acct(string passKey ,int acct_num)
+{
+    int acct_index =get_customer_index(acct_num);
+
+    if(acct_index ==-7)
+    {
+        printf("Account Not Found.\n");
+    }
+    else if(strcmp(customers[acct_index].password,passKey) == 0)
+    {
+        customers[acct_index].password =get_string("New Password: ");
+        customers[acct_index].name =get_string("New Name: ");
+
+        printf("Account Successfully Modified.\n");
+    }
+    else
+    {
+        printf("Invalid Password.\n");
+    }
 }
 
 void make_transactions(void)
 {
-    int option;
-    printf("1. Deposit Money\n");
-    printf("2. Withdraw Money\n");
-    printf("3. Transfer Money.\n");
+    printf("What do you want to do? \n");
 
+    printf("1. Deposit Funds. \n");
+    printf("2. Withdraw Funds. \n");
+    printf("3. Transfer Funds.\n");
 
-    scanf("%i",&option);
+    int option = get_int("Choose from the Options Above.");
 
-    switch (option)
+    if(option == 1)
     {
-    case 1:
-        // deposit(int money).
-        break;
-    case 2:
-        // Withdraw Money.
-        break;
-    case 3:
-        //Transfer Money.
-    default:
-        printf("Invalid Option");
-        break;
+        int acct_no = get_int("Enter The Account Number you want to Deposit into: ");
+
+        deposit_money(acct_no);      
+    }
+    else if(option ==2)
+    {
+        int acct_no = get_int("Enter The Account Number you want to Withdraw from: ");
+        string pasword =get_string("Password: ");   
+        withdraw_money(acct_no,pasword);
+    }
+    else if(option ==3)
+    {
+        string password =get_string("Your password: ");
+        int givers_acct =get_int("Givers Account Number: ");
+
+        transfer(password,givers_acct);
+    }
+    else
+    {
+        printf("Invalid option.\n");
     }
 }
 
-void check_balance(void)
+void deposit_money(int Acc_No)
 {
-    string number =get_string("Account Number: ");
-    string password=get_string("Password: ");
-    // Performs some sort of Authentication.
-}
+    int acct_index =get_customer_index(Acc_No);
 
-void create_acct(int customer_index)
-{
-    string name =get_string("Name: ");
-    string password =get_string("Create Password: ");
-    string acct_no =generate_acct_no();
-
-    customers[customer_index].name =name;
-    customers[customer_index].password =password;
-    customers[customer_index].acct_No= acct_no;
-    customers[customer_index].acct_deleted=false;
-    customers[customer_index].balance =0;
-
-    printf("\nAccount Successfully Created. Handle Your Details Confidentially.\n\n");
-
-    printf("Account Name: %s\n", customers[customer_index].name);
-    printf("Account Number: %s\n", customers[customer_index].acct_No);
-    printf("Password: %s\n", customers[customer_index].password);
-}
-
-string generate_acct_no(void) 
-{
-    int min = 1000000000;
-    long long max = 9999999999;
-  
-    srand(time(NULL));
-    
-    // Generate a 10-digit number.
-    int num = min + rand() % (max - min + 1);
-
-    static char bufer[20];
-
-    // Convert the number to a string and store it in the provided buffer.
-    
-    itoa(num,bufer,10);
-
-    return bufer;
-}
-
-
-void delete_acct(string acct_No,int number_of_customers)
-{
-    for(int i=0;i<number_of_customers;i++)
+    if(acct_index ==-7)
     {
-        if((strcmp(customers[i].acct_No,acct_No) ==0) && (customers[i].acct_deleted==false))
+        printf("Account is not on database.\n");
+    }
+    else
+    {
+        printf("Balance: %i\n",customers[acct_index].balance);
+        int amount = get_int("Amount: ");
+        if (amount >0)
         {
-            customers[i].acct_deleted =true;
-            printf("Account Successfully Deleted.\n");
-            return;
+            customers[acct_index].balance +=amount;
+            printf("Amount Successfully Deposited.\n");
+            printf("Balance: %i\n",customers[acct_index].balance);
+        }
+        else
+        {
+            printf("Invalid Amount.\n");
         }
     }
-    printf("\nAccount Does not Exist\n\n");
+    return;
 }
 
-void modify(string password, string acct_no)
+void withdraw_money(int Acc_No,string password)
 {
-    for(int i=0;i < number_of_customers;i++)
+    int acct_index =get_customer_index(Acc_No);
+
+    printf("Balance: %i\n",customers[acct_index].balance);
+
+    if(acct_index ==-7)
     {
-        if((strcmp(customers[i].password,password)==0)  && (strcmp(customers[i].acct_No,acct_no)==0) && (customers[i].acct_deleted==false))
+        printf("Account is not on database.\n");
+    }
+    else if(strcmp(customers[acct_index].password,password) == 0)
+    {
+        int amount = get_int("Amount: ");
+
+        if ( amount < customers[acct_index].balance)
         {
-            string new_password;
-            int count =0;
-            do
+            customers[acct_index].balance -=amount;
+            printf("Amount Successfully Withdrawn.\n");
+            printf("Balance: %i\n",customers[acct_index].balance);
+        }
+        else
+        {
+            printf("Balance: %i\n",customers[acct_index].balance);
+            printf("InSufficient Funds.\n");
+        }
+    }
+    else
+    {
+        printf("Incorrect password.\n");
+    }
+    return;
+}
+
+void transfer(string password,int giver)
+{
+    int receiver_index, receiver;
+    int giver_index =get_customer_index(giver);
+             
+    if(giver_index ==-7)
+    {
+        printf("Your Account  is not on the Database.\n");
+    }
+    else if(strcmp(password,customers[giver_index].password) == 0)
+    {
+        receiver = get_int("Receivers Account: ");
+        receiver_index =get_customer_index(receiver);
+        if(receiver_index ==-7)
+        {
+            printf("Receivers Account is not on the database.\n");
+        }
+        else
+        {
+            int amount  = get_int("Enter Transfer Amount: ");
+
+            if(amount < customers[giver_index].balance)
             {
-                if(count>0)
-                {
-                    printf("\nEnter a different password.\n\n");
-                }
-                new_password = get_string("Enter New Password: ");
-                
-                count++;
-            } 
-            while (strcmp(customers[i].password,new_password) ==0);
-            
-            customers[i].name = get_string("Enter new Name: ");;
-            customers[i].password = new_password;
-            printf("Account Successfully modified.\n");
-            return;
+                customers[giver_index].balance-=amount;
+                customers[receiver_index].balance+=amount;
+
+                printf("Transfer Successful.\n");
+            }
+            else
+            {
+                printf("Insufficient Funds.\n");
+            }
         }
     }
-    printf("Account Provided Isn't found on the DataBase.\n");
+    else
+    {
+        printf("Incorrect Password.\n");
+    }
+    return;
 }
 
+void check_balance(int acct_no,string password)
+{
+    int index =get_customer_index(acct_no);
+    if(index == -7)
+    {
+        printf("Account is not on database.\n");
+    }
+    else if(strcmp(customers[index].password,password)==0)
+    {
+        printf("Your balance is: %i\n",customers[index].balance);
+    }
+    else
+    {
+        printf("Wrong password.\n");
+    }
+}
